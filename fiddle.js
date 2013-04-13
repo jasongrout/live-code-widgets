@@ -1,0 +1,1 @@
+var cm = CodeMirror.fromTextArea($("#code")[0])
