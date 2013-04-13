@@ -3,7 +3,7 @@ description: markedRange widgets that change the text
 authors:
   - Jason Grout
 resources:
+  - http://codemirror.net/mode/python/python.js
   - http://codemirror.net/lib/codemirror.css
   - http://codemirror.net/lib/codemirror.js
-  - http://codemirror.net/mode/python/python.js
 normalize_css: no

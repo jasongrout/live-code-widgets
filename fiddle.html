@@ -1,8 +1,12 @@
 <p>Select an integer and press the "Insert Widget" button</p>
-<button id="insert">Insert Widget</button>
+<button id="insertinteger">Insert Integer Widget</button>
+<button id="inserttable">Insert Table Widget</button>
 <textarea id="code">
 G = 3
 </textarea>
 Text content:
 <pre id="content"></pre>
-<span class="widget-template widget"><button class="dec">-</button><span class="value"></span><button class="inc">+</button></span>
+<div class="widget-templates">
+    <span class="integerwidget widget"><button class="dec">-</button><input type='text'  class="value" size=4></input><button class="inc">+</button></span>
+    <span class="tablewidget widget"><table><tr><td><input type="text"></input></td><td>2</td></tr><tr><td>3</td><td>4</td></tr></table></span>
+</div>

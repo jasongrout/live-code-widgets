@@ -1,5 +1,8 @@
-.widget {border: 1px solid}
-.widget-template {display:none}
+.widget {
+    border: 1px solid
+}
+.widget-templates {display:none}
+.tablewidget td {border: 1px solid}
 #content {border: 1px solid}
 .CodeMirror {
   border: 1px solid #eee;
