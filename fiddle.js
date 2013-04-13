@@ -36,18 +36,17 @@ $(function() {
             var r = range()
             return cm.getRange(r.from, r.to)
         }
-        var setValue = function() {
-            var text = getText()
-            var value = 0
-            if (text !== "") {
-                value = parseInt(text);
-            }
-            node.find('.value').text(value);
-        }
         var changeValue = function(inc) {
             value += inc;
             replaceText(value.toString());
             node.find('.value').text(value);
+        }
+        var setValue = function() {
+            var text = getText()
+            if (text !== "") {
+                value = parseInt(text);
+            }
+            changeValue(0)
         }
         node.find('.inc').click(function() {changeValue(1)})
         node.find('.dec').click(function() {changeValue(-1)})
