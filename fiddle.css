@@ -1,1 +1,11 @@
 .widget {border: 1px solid}
+.widget-template {display:none}
+#content {border: 1px solid}
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}
