@@ -66,18 +66,30 @@ function IntegerWidget() {
     this.node.find('.value').change(function(e) {_this.setValue($(this).val())})
 
     // Cursor movement into and out of the input box
-    CodeMirror.on(this.mark, "beforeCursorEnter", function() {
-        // TODO: be intelligent about which side we are entering from
-        _this.node.find('.value').focus();
-    });    
+    CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
+        // TODO: *only* do something if it was a plain arrowkey move.
+        //  don't do anything if it was extending the selection, deleting the input, etc.
+        var t = _this.node.find('.value')
+        var curr = _this.cm.getCursor()
+        var m = _this.mark.find().from
+        t.focus();
+        if (curr.line === m.line && curr.ch === m.ch) {
+            t.setCursorPosition(0)
+        } else {
+            t.setCursorPosition(t.val().length)
+        }
+    });
     this.node.find('.value').keydown(function(e) {
         // when we move out of the box, put the cursor back in the codemirror instance
-        // TODO: be smarter about where the cursor in codemirror ends up.
         var t = $(this);
         var pos = t.getCursorPosition()
-        if ((pos==t.val().length && e.keyCode==39)
-           || (pos==0 && e.keyCode==37)) {
+        var range = _this.mark.find()
+        if (pos===0 && e.keyCode===37) {
             _this.cm.focus()
+            _this.cm.setCursor(range.from)
+        } else if (pos===t.val().length && e.keyCode===39) {
+            _this.cm.focus()
+            _this.cm.setCursor(range.to)
         }
     })
     
@@ -122,3 +134,18 @@ function TableWidget() {
         }
     }
 })(jQuery);
+
+// from http://stackoverflow.com/q/499126/1200039
+new function($) {
+  $.fn.setCursorPosition = function(pos) {
+    if ($(this).get(0).setSelectionRange) {
+      $(this).get(0).setSelectionRange(pos, pos);
+    } else if ($(this).get(0).createTextRange) {
+      var range = $(this).get(0).createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', pos);
+      range.moveStart('character', pos);
+      range.select();
+    }
+  }
+}(jQuery);
