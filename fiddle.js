@@ -8,7 +8,7 @@ $(function() {
         var from = cm.getCursor(true)
         var to = cm.getCursor(false)
         var widget = newWidget(cm)
-        m=cm.markText(from, to, {replacedWith: widget.domNode})
+        var m=cm.markText(from, to, {replacedWith: widget.domNode})
         widget.mark = m;
         widget.setValue();
         cm.setCursor(to);
@@ -19,7 +19,7 @@ $(function() {
     cm.on("change", updateContents);
     
     newWidget = function(cm) {
-        obj = {}
+        var obj = {}
         var value = 0;
         var node = $(".widget-template").clone().removeClass('widget-template');
         var range = function() {
@@ -29,15 +29,19 @@ $(function() {
             return find;
         }
         var replaceText = function(text) {
-            r = range()
+            var r = range()
             cm.replaceRange(text, r.from, r.to)
         }
         var getText = function() {
-            r = range()
+            var r = range()
             return cm.getRange(r.from, r.to)
         }
         var setValue = function() {
-            value = parseInt(getText());
+            var text = getText()
+            var value = 0
+            if (text !== "") {
+                value = parseInt(text);
+            }
             node.find('.value').text(value);
         }
         var changeValue = function(inc) {
