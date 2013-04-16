@@ -134,33 +134,38 @@ function TableWidget() {
             t.find("input").last().focus();
         }
     });
-    this.node.find("input").last().keydown(function(e) {
-        if (e.keyCode === 9 && !e.shiftKey) {
-            _this.cm.focus();
-            _this.cm.setCursor(_this.mark.find().to);
-            return false;
-        }
-    });
 
-    this.node.find("input").first().keydown(function(e) {
-        if (e.keyCode === 9 && e.shiftKey) {
-            _this.cm.focus();
-            _this.cm.setCursor(_this.mark.find().from);
-            return false;
-        }
-    });
-
-    this.node.find('table').keydown('ctrl+.', function(event) {_this.insertRow(event); _this.updateText();})
-    this.node.find('table').keydown('ctrl+,', function(event) {_this.insertColumn(event); _this.updateText();})
-
+    t = this.node.find('table');
+    t.keydown('ctrl+.', function(event) {_this.insertRow(event); _this.updateText();})
+    t.keydown('ctrl+,', function(event) {_this.insertColumn(event); _this.updateText();})
+    t.find('input').first().keydown('shift+tab', $.proxy(this,'exitLeft'))
+    t.find('input').last().keydown('tab', $.proxy(this,'exitRight'))
     this.updateText();
+}
+
+TableWidget.prototype.exitLeft = function() {
+    this.cm.focus();
+    this.cm.setCursor(this.mark.find().from);
+    return false;
+}
+
+TableWidget.prototype.exitRight = function() {
+    this.cm.focus();
+    this.cm.setCursor(this.mark.find().to);
+    return false;
 }
 
 TableWidget.prototype = Object.create(Widget.prototype)
 
 TableWidget.prototype.insertRow = function(event) {
     var tr = $(event.target).closest('tr');
-    tr.after(tr.clone());
+    var newtr = tr.clone();
+    tr.after(newtr);
+    // if last tr, we need to remove the event handler and add it to the new last input
+    if (newtr.next('tr').length === 0) {
+        tr.find('input').last().off('keydown');
+        newtr.find('input').last().keydown('tab', $.proxy(this,'exitRight'))
+    }
 }
 
 TableWidget.prototype.insertColumn = function(event) {
