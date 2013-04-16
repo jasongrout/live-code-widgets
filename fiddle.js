@@ -18,6 +18,7 @@ $(function() {
     cm.on("change", updateContents);
     
 })
+
 if ( !Object.create ) {
     // shim for ie8, etc.
     Object.create = function ( o ) {
@@ -114,38 +115,107 @@ function TableWidget() {
     this.node = $(".widget-templates .tablewidget").clone();
     this.domNode = this.node[0];
     Widget.apply(this, arguments);
+    _this = this;
+
+    this.node.find("table").change($.proxy(this, 'updateText'));
+
+    // Cursor movement into and out of the input box
+    CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
+        // TODO: *only* do something if it was a plain arrowkey move.
+        //  don't do anything if it was extending the selection, deleting the input, etc.
+        var t = _this.node.find('table')
+        var curr = _this.cm.getCursor()
+        var m = _this.mark.find().from
+        if (curr.line === m.line && curr.ch === m.ch) {
+            // first item
+            t.find("input").first().focus();
+        } else {
+            // last item
+            t.find("input").last().focus();
+        }
+    });
+    this.node.find("input").last().keydown(function(e) {
+        if (e.keyCode === 9 && !e.shiftKey) {
+            _this.cm.focus();
+            _this.cm.setCursor(_this.mark.find().to);
+            return false;
+        }
+    });
+
+    this.node.find("input").first().keydown(function(e) {
+        if (e.keyCode === 9 && e.shiftKey) {
+            _this.cm.focus();
+            _this.cm.setCursor(_this.mark.find().from);
+            return false;
+        }
+    });
+
+/*    this.node.find('table').keydown(function(e) {
+        // when we move out of the box, put the cursor back in the codemirror instance
+        var t = $(e.target);
+        console.log(t);
+        var TABKEY = 9;
+        var range = _this.mark.find()
+        if (pos===0 && e.keyCode===37) {
+            _this.cm.focus()
+            _this.cm.setCursor(range.from)
+        } else if (pos===t.val().length && e.keyCode===39) {
+            _this.cm.focus()
+            _this.cm.setCursor(range.to)
+        }
+
+    })
+*/
+    this.updateText();
+}
+
+TableWidget.prototype = Object.create(Widget.prototype)
+
+TableWidget.prototype.updateText = function() {
+    var matrix = [];
+    $($("table")[1])
+        .find('tr')
+        .each(function() {
+            var row = [];
+            $(this).find('input').each(function() {row.push(interpret($(this).val()))});
+            matrix.push(row);
+        });
+    this.setText(JSON.stringify(matrix));
 }
 
 // From http://stackoverflow.com/a/2897510/1200039
-(function($) {
-    $.fn.getCursorPosition = function() {
-        var input = this.get(0);
-        if (!input) return; // No (input) element found
-        if ('selectionStart' in input) {
-            // Standard-compliant browsers
-            return input.selectionStart;
-        } else if (document.selection) {
-            // IE
-            input.focus();
-            var sel = document.selection.createRange();
-            var selLen = document.selection.createRange().text.length;
-            sel.moveStart('character', -input.value.length);
-            return sel.text.length - selLen;
-        }
+$.fn.getCursorPosition = function() {
+    var input = this.get(0);
+    if (!input) return; // No (input) element found
+    if ('selectionStart' in input) {
+        // Standard-compliant browsers
+        return input.selectionStart;
+    } else if (document.selection) {
+        // IE
+        input.focus();
+        var sel = document.selection.createRange();
+        var selLen = document.selection.createRange().text.length;
+        sel.moveStart('character', -input.value.length);
+        return sel.text.length - selLen;
     }
-})(jQuery);
+}
 
 // from http://stackoverflow.com/q/499126/1200039
-new function($) {
-  $.fn.setCursorPosition = function(pos) {
+$.fn.setCursorPosition = function(pos) {
     if ($(this).get(0).setSelectionRange) {
-      $(this).get(0).setSelectionRange(pos, pos);
+        $(this).get(0).setSelectionRange(pos, pos);
     } else if ($(this).get(0).createTextRange) {
-      var range = $(this).get(0).createTextRange();
-      range.collapse(true);
-      range.moveEnd('character', pos);
-      range.moveStart('character', pos);
-      range.select();
+        var range = $(this).get(0).createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', pos);
+        range.moveStart('character', pos);
+        range.select();
     }
-  }
-}(jQuery);
+}
+
+function interpret(n) {
+    if (n!== "" && !isNaN(n)) {
+        n = +n; // convert n to number
+    }
+    return n;
+}
