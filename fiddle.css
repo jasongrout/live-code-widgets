@@ -12,3 +12,9 @@
   overflow-y: hidden;
   overflow-x: auto;
 }
+
+.CodeMirror div.CodeMirror-cursor {
+  background-color:pink;
+  width:1ex;
+  z-index: 0;
+}
