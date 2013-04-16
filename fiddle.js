@@ -150,8 +150,8 @@ function TableWidget() {
         }
     });
 
-    this.node.find('table').keydown('ctrl+.', function(event) {_this.insertRow(event)})
-    this.node.find('table').keydown('ctrl+,', function(event) {_this.insertColumn(event)})
+    this.node.find('table').keydown('ctrl+.', function(event) {_this.insertRow(event); _this.updateText();})
+    this.node.find('table').keydown('ctrl+,', function(event) {_this.insertColumn(event); _this.updateText();})
 
     this.updateText();
 }
