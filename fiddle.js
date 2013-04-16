@@ -150,26 +150,23 @@ function TableWidget() {
         }
     });
 
-/*    this.node.find('table').keydown(function(e) {
-        // when we move out of the box, put the cursor back in the codemirror instance
-        var t = $(e.target);
-        console.log(t);
-        var TABKEY = 9;
-        var range = _this.mark.find()
-        if (pos===0 && e.keyCode===37) {
-            _this.cm.focus()
-            _this.cm.setCursor(range.from)
-        } else if (pos===t.val().length && e.keyCode===39) {
-            _this.cm.focus()
-            _this.cm.setCursor(range.to)
-        }
+    this.node.find('table').keydown('ctrl+.', function(event) {_this.insertRow(event)})
+    this.node.find('table').keydown('ctrl+,', function(event) {_this.insertColumn(event)})
 
-    })
-*/
     this.updateText();
 }
 
 TableWidget.prototype = Object.create(Widget.prototype)
+
+TableWidget.prototype.insertRow = function(event) {
+    var tr = $(event.target).closest('tr');
+    tr.after(tr.clone());
+}
+
+TableWidget.prototype.insertColumn = function(event) {
+    console.log('insert column');
+}
+
 
 TableWidget.prototype.updateText = function() {
     var matrix = [];
@@ -219,3 +216,121 @@ function interpret(n) {
     }
     return n;
 }
+/***********************************************************************/
+/*
+ * jQuery Hotkeys Plugin
+ * Copyright 2010, John Resig
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ *
+ * Based upon the plugin by Tzury Bar Yochay:
+ * http://github.com/tzuryby/hotkeys
+ *
+ * Original idea by:
+ * Binny V A, http://www.openjs.com/scripts/events/keyboard_shortcuts/
+*/
+
+(function(jQuery){
+	
+	jQuery.hotkeys = {
+		version: "0.8",
+
+		specialKeys: {
+			8: "backspace", 9: "tab", 13: "return", 16: "shift", 17: "ctrl", 18: "alt", 19: "pause",
+			20: "capslock", 27: "esc", 32: "space", 33: "pageup", 34: "pagedown", 35: "end", 36: "home",
+			37: "left", 38: "up", 39: "right", 40: "down", 45: "insert", 46: "del", 
+			96: "0", 97: "1", 98: "2", 99: "3", 100: "4", 101: "5", 102: "6", 103: "7",
+			104: "8", 105: "9", 106: "*", 107: "+", 109: "-", 110: ".", 111 : "/", 
+			112: "f1", 113: "f2", 114: "f3", 115: "f4", 116: "f5", 117: "f6", 118: "f7", 119: "f8", 
+		    120: "f9", 121: "f10", 122: "f11", 123: "f12", 144: "numlock", 145: "scroll", 191: "/", 224: "meta"
+		},
+	
+		shiftNums: {
+			"`": "~", "1": "!", "2": "@", "3": "#", "4": "$", "5": "%", "6": "^", "7": "&", 
+			"8": "*", "9": "(", "0": ")", "-": "_", "=": "+", ";": ": ", "'": "\"", ",": "<", 
+			".": ">",  "/": "?",  "\\": "|"
+		},
+            exceptions: {
+                186: 59, // ;
+                187: 61, // =
+                188: 44, // ,
+                189: 45, // -
+                190: 46, // .
+                191: 47, // /
+                192: 96, // `
+                219: 91, // [
+                220: 92, // \
+                221: 93, // ]
+                222: 39  // '
+            }
+	};
+
+	function keyHandler( handleObj ) {
+		// Only care when a possible input has been specified
+		if ( typeof handleObj.data !== "string" ) {
+			return;
+		}
+		
+		var origHandler = handleObj.handler,
+			keys = handleObj.data.toLowerCase().split(" ")
+	    //textAcceptingInputTypes = ["text", "password", "number", "email", "url", "range", "date", "month", "week", "time", "datetime", "datetime-local", "search", "color"];
+	
+		handleObj.handler = function( event ) {
+			// Don't fire in text-accepting inputs that we didn't directly bind to
+			/*if ( this !== event.target && (/textarea|select/i.test( event.target.nodeName ) ||
+				jQuery.inArray(event.target.type, textAcceptingInputTypes) > -1 ) ) {
+				return;
+			}
+                        */
+			
+			// Keypress represents characters, not special keys
+			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ],
+		    character = String.fromCharCode( jQuery.hotkeys.exceptions[event.which] || event.which ).toLowerCase(),
+				key, modif = "", possible = {};
+
+			// check combinations (alt|ctrl|shift+anything)
+			if ( event.altKey && special !== "alt" ) {
+				modif += "alt+";
+			}
+
+			if ( event.ctrlKey && special !== "ctrl" ) {
+				modif += "ctrl+";
+			}
+			
+			// TODO: Need to make sure this works consistently across platforms
+			if ( event.metaKey && !event.ctrlKey && special !== "meta" ) {
+				modif += "meta+";
+			}
+
+			if ( event.shiftKey && special !== "shift" ) {
+				modif += "shift+";
+			}
+
+			if ( special ) {
+				possible[ modif + special ] = true;
+
+			} else {
+				possible[ modif + character ] = true;
+				possible[ modif + jQuery.hotkeys.shiftNums[ character ] ] = true;
+
+				// "$" can be triggered as "Shift+4" or "Shift+$" or just "$"
+				if ( modif === "shift+" ) {
+					possible[ jQuery.hotkeys.shiftNums[ character ] ] = true;
+				}
+			}
+                    console.log(modif+" | "+character+" | ");
+                    console.log(possible);
+
+			for ( var i = 0, l = keys.length; i < l; i++ ) {
+				if ( possible[ keys[i] ] ) {
+					return origHandler.apply( this, arguments );
+				}
+			}
+		};
+	}
+
+	jQuery.each([ "keydown", "keyup", "keypress" ], function() {
+		jQuery.event.special[ this ] = { add: keyHandler };
+	});
+
+})( jQuery );
+/************ END Jquery hotkeys plugin *******************/
