@@ -170,13 +170,11 @@ TableWidget.prototype.insertColumn = function(event) {
 
 TableWidget.prototype.updateText = function() {
     var matrix = [];
-    $($("table")[1])
-        .find('tr')
-        .each(function() {
-            var row = [];
-            $(this).find('input').each(function() {row.push(interpret($(this).val()))});
-            matrix.push(row);
-        });
+    this.node.find('tr').each(function() {
+        var row = [];
+        $(this).find('input').each(function() {row.push(interpret($(this).val()))});
+        matrix.push(row);
+    });
     this.setText("matrix(QQ,"+JSON.stringify(matrix)+")");
 }
 
@@ -317,9 +315,6 @@ function interpret(n) {
 					possible[ jQuery.hotkeys.shiftNums[ character ] ] = true;
 				}
 			}
-                    console.log(modif+" | "+character+" | ");
-                    console.log(possible);
-
 			for ( var i = 0, l = keys.length; i < l; i++ ) {
 				if ( possible[ keys[i] ] ) {
 					return origHandler.apply( this, arguments );
