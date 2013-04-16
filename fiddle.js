@@ -180,7 +180,7 @@ TableWidget.prototype.updateText = function() {
             $(this).find('input').each(function() {row.push(interpret($(this).val()))});
             matrix.push(row);
         });
-    this.setText(JSON.stringify(matrix));
+    this.setText("matrix(QQ,"+JSON.stringify(matrix)+")");
 }
 
 // From http://stackoverflow.com/a/2897510/1200039
