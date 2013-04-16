@@ -2,7 +2,19 @@
     border: 1px solid
 }
 .widget-templates {display:none}
-.tablewidget td {border: 1px solid}
+.tablewidget table {border-collapse: collapse}
+.tablewidget input {
+    margin: 0;
+    border:0px}
+.tablewidget table td {
+    border: 1px solid lightgrey;
+    padding:0px;
+    margin:0px;
+}
+.tablewidget input {
+    border: 0px;
+    text-align: right;
+}
 #content {border: 1px solid}
 .CodeMirror {
   border: 1px solid #eee;
