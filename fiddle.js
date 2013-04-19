@@ -2,17 +2,22 @@ $(function() {
     var cm = CodeMirror.fromTextArea($("#code")[0],
                                      {mode: "python",
                                       lineNumbers:true,
-                                      autofocus:true})
+                                      autofocus:true,
+                                      extraKeys: {
+                                          'Ctrl-,': false,
+                                          'Ctrl-.': false
+                                      }
+                                     })
     $("#insertinteger").click(function() {
         // change the marked range text to have delimiters
         new IntegerWidget(cm)
-        cm.focus();
     })
     $("#inserttable").click(function() {
         // change the marked range text to have delimiters
         new TableWidget(cm)
-        cm.focus();
     })
+    $(cm.getWrapperElement()).keydown('ctrl+.', function(event) {new TableWidget(cm,{rows:2})});
+    $(cm.getWrapperElement()).keydown('ctrl+,', function(event) {new TableWidget(cm,{columns:2})});
     var updateContents = function(cm) { $("#content").text(cm.getValue())};
     updateContents(cm)
     cm.on("change", updateContents);
@@ -55,7 +60,7 @@ Widget.prototype.getText = function() {
     return this.cm.getRange(r.from, r.to)
 }
 
-function IntegerWidget() {
+function IntegerWidget(cm) {
     this.value = 0;
     this.node = $(".widget-templates .integerwidget").clone();
     this.domNode = this.node[0];
@@ -111,19 +116,17 @@ IntegerWidget.prototype.setValue = function(val) {
     this.node.find('.value').val(this.value);
 }
 
-function TableWidget() {
+function TableWidget(cm, options) {
     this.node = $(".widget-templates .tablewidget").clone();
     this.domNode = this.node[0];
     Widget.apply(this, arguments);
     _this = this;
 
-    this.node.find("table").change($.proxy(this, 'updateText'));
-
+    t = this.node.find('table');
     // Cursor movement into and out of the input box
     CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
         // TODO: *only* do something if it was a plain arrowkey move.
         //  don't do anything if it was extending the selection, deleting the input, etc.
-        var t = _this.node.find('table')
         var curr = _this.cm.getCursor()
         var m = _this.mark.find().from
         if (curr.line === m.line && curr.ch === m.ch) {
@@ -135,13 +138,27 @@ function TableWidget() {
         }
     });
 
-    t = this.node.find('table');
-    t.keydown('ctrl+.', function(event) {_this.insertRow(event); _this.updateText();})
-    t.keydown('ctrl+,', function(event) {_this.insertColumn(event); _this.updateText();})
-    t.find('input').first().keydown('shift+tab', $.proxy(this,'exitLeft'))
-    t.find('input').last().keydown('tab', $.proxy(this,'exitRight'))
+    t.change($.proxy(this, 'updateText'));
+    t.keydown('ctrl+.', function(event) {_this.insertRow(event.target); _this.updateText(); event.target.focus(); return false;})
+    t.keydown('ctrl+,', function(event) {_this.insertColumn(event.target); _this.updateText(); event.target.focus(); return false;})
+    t.find('input').first().keydown('shift+tab', $.proxy(this, 'exitLeft'));
+    t.find('input').last().keydown('tab', $.proxy(this, 'exitRight'));
     this.updateText();
+    var firstinput = t.find('input').first();
+    if (options.rows !== undefined) {
+        for (var i=1;i<options.rows;i++) {
+            this.insertRow(firstinput);
+        }
+    }
+    if (options.columns !== undefined) {
+        for (var i=1; i<options.columns;i++) {
+            this.insertColumn(firstinput);
+        }
+    }
+    firstinput.focus();
 }
+
+TableWidget.prototype = Object.create(Widget.prototype)
 
 TableWidget.prototype.exitLeft = function() {
     this.cm.focus();
@@ -155,10 +172,8 @@ TableWidget.prototype.exitRight = function() {
     return false;
 }
 
-TableWidget.prototype = Object.create(Widget.prototype)
-
-TableWidget.prototype.insertRow = function(event) {
-    var tr = $(event.target).closest('tr');
+TableWidget.prototype.insertRow = function(target) {
+    var tr = $(target).closest('tr');
     var newtr = tr.clone();
     tr.after(newtr);
     // if last tr, we need to remove the event handler and add it to the new last input
@@ -168,10 +183,20 @@ TableWidget.prototype.insertRow = function(event) {
     }
 }
 
-TableWidget.prototype.insertColumn = function(event) {
-    console.log('insert column');
+TableWidget.prototype.insertColumn = function(target) {
+    var target = $(target).closest('td');
+    
+    var colIndex = target.index();
+    var lastCol = target.closest('tr').find('td').get(-1) == target[0];
+    var column = target.closest('table').find('tr').find('td:eq('+colIndex+')');
+    column.each(function() {$(this).after($(this).clone())});
+    // if last column, we need to remove the event handler and add it to the new last input
+    if (lastCol) {
+        var lastrow = target.closest('table').find('tr').last();
+        lastrow.find('input').eq(-2).off('keydown');
+        lastrow.find('input').last().keydown('tab', $.proxy(this,'exitRight'))
+    }
 }
-
 
 TableWidget.prototype.updateText = function() {
     var matrix = [];
@@ -322,7 +347,7 @@ function interpret(n) {
 			}
 			for ( var i = 0, l = keys.length; i < l; i++ ) {
 				if ( possible[ keys[i] ] ) {
-					return origHandler.apply( this, arguments );
+                                    return origHandler.apply( this, arguments );
 				}
 			}
 		};
