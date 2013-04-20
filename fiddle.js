@@ -12,14 +12,8 @@ $(function() {
                                           'Ctrl-.': false
                                       }
                                      })
-    $("#insertinteger").click(function() {
-        // change the marked range text to have delimiters
-        new IntegerWidget(cm)
-    })
-    $("#inserttable").click(function() {
-        // change the marked range text to have delimiters
-        new TableWidget(cm)
-    })
+    $("#insertinteger").click(function() {new IntegerWidget(cm)});
+    $("#inserttable").click(function() {new TableWidget(cm)});
     $(cm.getWrapperElement()).keydown('ctrl+.', function(event) {new TableWidget(cm,{rows:2})});
     $(cm.getWrapperElement()).keydown('ctrl+,', function(event) {new TableWidget(cm,{columns:2})});
 
