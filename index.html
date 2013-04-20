@@ -13,8 +13,18 @@
 
 <body>
 
+<p>To insert a matrix widget, press the button or type
+<code>Ctrl-,</code> or <code>Ctrl-.</code>.  Add rows by pressing
+<code>Ctrl-.</code> and columns with <code>Ctrl-,</code>.  Use
+<code>Enter</code> to traverse the table in columns, and
+<code>Tab</code> to traverse the table in rows.  Arrow keys navigate
+the table too.  Entering and exiting the table works with the arrow
+keys or the tab/shift-tab keys.</p>
 
-<p>Select an integer and press the "Insert Widget" button</p>
+<p>To insert an integer widget, click the button.  If you have an
+integer selected, it will be the default.  Use arrow keys to navigate
+through the widget.</p>
+
 <button id="insertinteger">Insert Integer Widget</button>
 <button id="inserttable">Insert Table Widget</button>
 <textarea id="code">
@@ -25,4 +35,5 @@ Text content:
 <div class="widget-templates">
     <span class="integerwidget widget"><button class="dec">-</button><input type='text'  class="value" size=4></input><button class="inc">+</button></span>
     <div class="tablewidget widget"><table><tr><td><input type="text" size=2></input></td></tr></table></div>
-    </body> </html>
+
+</body> </html>
