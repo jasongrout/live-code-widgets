@@ -18,10 +18,10 @@
 #content {border: 1px solid}
 .CodeMirror {
   border: 1px solid #eee;
-  height: 400px;
+  height: 18em;
 }
 .CodeMirror-scroll {
-  overflow-y: hidden;
+  overflow-y: auto;
   overflow-x: auto;
 }
 
