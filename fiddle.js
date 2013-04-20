@@ -14,6 +14,7 @@ $(function() {
                                      })
     $("#insertinteger").click(function() {new IntegerWidget(cm)});
     $("#inserttable").click(function() {new TableWidget(cm)});
+    $("#insertgraph").click(function() {new GraphWidget(cm)});
     $(cm.getWrapperElement()).keydown('ctrl+.', function(event) {new TableWidget(cm,{rows:2})});
     $(cm.getWrapperElement()).keydown('ctrl+,', function(event) {new TableWidget(cm,{columns:2})});
 
@@ -160,6 +161,32 @@ IntegerWidget.prototype.setValue = function(val) {
     this.setText(this.value.toString());
     this.node.find('.value').val(this.value);
 }
+
+function GraphWidget(cm) {
+    var _this = this
+    this.node = $(".widget-templates .graphwidget").clone();
+    this.domNode = this.node[0];
+    this.graph = new GraphEditor(this.domNode, {width:200, height:200})
+    Widget.apply(this, arguments);
+
+    this.graph.changed = function() {
+        var u,v,i;
+        var graph = {'widget': 'graph'};
+        graph.vertices = _this.graph.nodes.length;
+        graph.edges = [];
+        for (i = 0; i < _this.graph.links.length; i++) {
+            u = _this.graph.nodes.indexOf(_this.graph.links[i].source);
+            v = _this.graph.nodes.indexOf(_this.graph.links[i].target);
+            graph.edges.push([u,v]);
+        }
+        _this.setText(JSON.stringify(graph));
+        console.log(graph);
+
+    }
+    this.graph.changed();
+}
+GraphWidget.prototype = Object.create(Widget.prototype)
+
 
 function TableWidget(cm, options) {
     this.node = $(".widget-templates .tablewidget").clone();

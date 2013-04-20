@@ -11,8 +11,14 @@ keys or the tab/shift-tab keys.</p>
 integer selected, it will be the default.  Use arrow keys to navigate
 through the widget.</p>
 
+<p>The graph editor widget is an <a
+href="http://bl.ocks.org/mbostock/929623">example</a> from <a
+href="http://d3js.org/">d3.js</a>.  Click to insert a vertex.  Click
+close to other vertices to insert edges.</p>
+
 <button id="insertinteger">Insert Integer Widget</button>
 <button id="inserttable">Insert Table Widget</button>
+<button id="insertgraph">Insert Graph Widget</button>
 <textarea id="code">
 G = 3
 </textarea>
@@ -21,3 +27,5 @@ Text content:
 <div class="widget-templates">
     <span class="integerwidget widget"><button class="dec">-</button><input type='text'  class="value" size=4></input><button class="inc">+</button></span>
     <div class="tablewidget widget"><table><tr><td><input type="text" size=2></input></td></tr></table></div>
+    <div class="graphwidget widget"></div>
+</div>
