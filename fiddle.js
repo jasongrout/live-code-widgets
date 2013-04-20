@@ -186,6 +186,7 @@ function TableWidget(cm, options) {
         } else {
             _this.exitRight();
         }
+        return false;
     });
     t.keydown('left', $.proxy(this, 'left'));
     t.keydown('right', $.proxy(this, 'right'));
