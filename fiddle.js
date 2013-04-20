@@ -118,20 +118,18 @@ function IntegerWidget(cm) {
     this.node.find('.dec').click($.proxy(this, 'changeValue', -1))
     this.node.find('.value').change(function(e) {_this.setValue($(this).val())})
 
-    this.node.find('.value').keydown(function(e) {
-        // when we move out of the box, put the cursor back in the codemirror instance
-        var t = $(this);
-        var pos = t.getCursorPosition()
-        var range = _this.mark.find()
-        if (pos===0 && e.keyCode===37) {
-            _this.cm.focus()
-            _this.cm.setCursor(range.from)
-        } else if (pos===t.val().length && e.keyCode===39) {
-            _this.cm.focus()
-            _this.cm.setCursor(range.to)
+    this.node.keydown('left', function(event) {
+        if ($(event.target).getCursorPosition()===0) {
+            _this.exit('left');
         }
-    })
-    
+    });
+    this.node.keydown('right', function(event) {
+        var t = $(event.target);
+        if (t.getCursorPosition()==t.val().length) {
+            _this.exit('right');
+        }
+    });
+
     var t = this.getText();
     if (t !== "") {
         this.value = parseInt(t);
@@ -147,6 +145,16 @@ IntegerWidget.prototype.enter = function(direction) {
         t.setCursorPosition(0);
     } else {
         t.setCursorPosition(t.val().length)
+    }
+}
+
+IntegerWidget.prototype.exit = function(direction) {
+    var range = this.mark.find();
+    this.cm.focus();
+    if (direction==='left') {
+        this.cm.setCursor(range.from)
+    } else {
+        this.cm.setCursor(range.to)
     }
 }
 
