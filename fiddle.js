@@ -1,3 +1,7 @@
+(function() {
+// posEq convenience function from CodeMirror source
+function posEq(a, b) {return a.line == b.line && a.ch == b.ch;}
+
 $(function() {
     var cm = CodeMirror.fromTextArea($("#code")[0],
                                      {mode: "python",
@@ -18,10 +22,24 @@ $(function() {
     })
     $(cm.getWrapperElement()).keydown('ctrl+.', function(event) {new TableWidget(cm,{rows:2})});
     $(cm.getWrapperElement()).keydown('ctrl+,', function(event) {new TableWidget(cm,{columns:2})});
+
+    // update the convenient display of text
     var updateContents = function(cm) { $("#content").text(cm.getValue())};
     updateContents(cm)
     cm.on("change", updateContents);
-    
+
+    cm.on("cursorActivity", function(cm) {
+        if (cm.widgetEnter) {
+            // check to see if movement is purely navigational, or if it
+            // doing something like extending selection
+            var cursorHead = cm.getCursor('head');
+            var cursorAnchor = cm.getCursor('anchor');
+            if (posEq(cursorHead, cursorAnchor)) {
+                cm.widgetEnter();
+            }
+            cm.widgetEnter = undefined;
+        }
+    });
 })
 
 if ( !Object.create ) {
@@ -35,16 +53,45 @@ if ( !Object.create ) {
 
 function Widget(cm) {
     // the subclass must define this.domNode before calling this constructor
-    this.cm = cm
-    cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8")
-    var from = cm.getCursor(true)
-    var to = cm.getCursor(false)
-    this.mark = cm.markText(from, to, {replacedWith: this.domNode,
-                                       //inclusiveLeft:true,inclusiveRight:true
-                                      })
+    var _this = this;
+    this.cm = cm;
+    cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8");
+    var from = cm.getCursor(true);
+    var to = cm.getCursor(false);
+    this.mark = cm.markText(from, to, {replacedWith: this.domNode});
+
+    if (this.enter) {
+        CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
+            // register the enter function 
+            // the actual movement happens if the cursor movement was a plain navigation
+            // but not if it was a backspace or selection extension, etc.
+            var direction = posEq(_this.cm.getCursor(), _this.mark.find().from) ? 'left' : 'right';
+            cm.widgetEnter = $.proxy(_this, 'enterIfDefined', direction);
+        });
+    }
+
     cm.setCursor(to);
     cm.refresh()
 }
+
+Widget.prototype.enterIfDefined = function(direction) {
+    // check to make sure the mark still exists
+    if (this.mark.find()) {
+        this.enter(direction);
+    } else {
+        // if we don't do this and do:
+
+        // G = <integer widget>
+        //
+        // 3x3 table widget 
+
+        // then backspace to get rid of table widget,
+        // the integer widget disappears until we type on the first
+        // line again.  Calling this refresh takes care of things.
+        this.cm.refresh();
+    }
+}
+
 Widget.prototype.range = function() {
     var find = this.mark.find()
     find.from.ch+=1
@@ -71,20 +118,6 @@ function IntegerWidget(cm) {
     this.node.find('.dec').click($.proxy(this, 'changeValue', -1))
     this.node.find('.value').change(function(e) {_this.setValue($(this).val())})
 
-    // Cursor movement into and out of the input box
-    CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
-        // TODO: *only* do something if it was a plain arrowkey move.
-        //  don't do anything if it was extending the selection, deleting the input, etc.
-        var t = _this.node.find('.value')
-        var curr = _this.cm.getCursor()
-        var m = _this.mark.find().from
-        t.focus();
-        if (curr.line === m.line && curr.ch === m.ch) {
-            t.setCursorPosition(0)
-        } else {
-            t.setCursorPosition(t.val().length)
-        }
-    });
     this.node.find('.value').keydown(function(e) {
         // when we move out of the box, put the cursor back in the codemirror instance
         var t = $(this);
@@ -107,6 +140,16 @@ function IntegerWidget(cm) {
     this.changeValue(0)
 }
 IntegerWidget.prototype = Object.create(Widget.prototype)
+IntegerWidget.prototype.enter = function(direction) {
+    var t = this.node.find('.value');
+    t.focus();
+    if (direction==='left') {
+        t.setCursorPosition(0);
+    } else {
+        t.setCursorPosition(t.val().length)
+    }
+}
+
 IntegerWidget.prototype.changeValue = function(inc) {
     this.setValue(this.value+inc);
 }
@@ -122,21 +165,7 @@ function TableWidget(cm, options) {
     Widget.apply(this, arguments);
     _this = this;
 
-    t = this.node.find('table');
-    // Cursor movement into and out of the input box
-    CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
-        // TODO: *only* do something if it was a plain arrowkey move.
-        //  don't do anything if it was extending the selection, deleting the input, etc.
-        var curr = _this.cm.getCursor()
-        var m = _this.mark.find().from
-        if (curr.line === m.line && curr.ch === m.ch) {
-            // first item
-            t.find("input").first().focus();
-        } else {
-            // last item
-            t.find("input").last().focus();
-        }
-    });
+    var t = this.node.find('table');
 
     t.change($.proxy(this, 'updateText'));
     t.keydown('ctrl+.', function(event) {_this.insertRow(event.target); _this.updateText(); event.target.focus(); return false;})
@@ -159,6 +188,15 @@ function TableWidget(cm, options) {
 }
 
 TableWidget.prototype = Object.create(Widget.prototype)
+
+TableWidget.prototype.enter = function(direction) {
+    var inputs = this.node.find('table').find('input');
+    if (direction==='left') {
+        inputs.first().focus();
+    } else {
+        inputs.last().focus();
+    }
+}
 
 TableWidget.prototype.exitLeft = function() {
     this.cm.focus();
@@ -359,3 +397,4 @@ function interpret(n) {
 
 })( jQuery );
 /************ END Jquery hotkeys plugin *******************/
+})()
