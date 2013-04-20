@@ -180,7 +180,19 @@ function TableWidget(cm, options) {
     t.keydown('ctrl+,', function(event) {_this.insertColumn(event.target); _this.updateText(); event.target.focus(); return false;})
     t.keydown('up', $.proxy(this, 'up'));
     t.keydown('down', $.proxy(this, 'down'));
-    t.keydown('enter', $.proxy(this, 'down'));
+    t.keydown('return', function(event) {
+        var target = $(event.target);
+        if (target.closest('tr').next().length > 0) {
+            _this.down(event);
+        } else if (target.closest('td').next().length > 0) {
+            // wrap
+            target.closest('table')
+                .find('tr:eq(0) td:eq('+target.closest('td').next().index()+') input')
+                .focus();
+        } else {
+            _this.exitRight();
+        }
+    });
     t.keydown('left', $.proxy(this, 'left'));
     t.keydown('right', $.proxy(this, 'right'));
 
@@ -204,7 +216,6 @@ function TableWidget(cm, options) {
 }
 
 TableWidget.prototype = Object.create(Widget.prototype)
-
 TableWidget.prototype.enter = function(direction) {
     var inputs = this.node.find('table').find('input');
     if (direction==='left') {
@@ -213,19 +224,16 @@ TableWidget.prototype.enter = function(direction) {
         inputs.last().focus();
     }
 }
-
     TableWidget.prototype.up = function(event) {
         var td = $(event.target).closest('td')
         var prevRow = $(td).closest('tr').prev();
         prevRow && prevRow.find('td:eq('+td.index()+') input').focus();
     }
-
     TableWidget.prototype.down = function(event) {
         var td = $(event.target).closest('td')
         var nextRow = $(td).closest('tr').next();
         nextRow && nextRow.find('td:eq('+td.index()+') input').focus();
     }
-
     TableWidget.prototype.left = function(event) {
         var t = $(event.target);
         var pos = t.getCursorPosition();
