@@ -178,8 +178,16 @@ function TableWidget(cm, options) {
     t.change($.proxy(this, 'updateText'));
     t.keydown('ctrl+.', function(event) {_this.insertRow(event.target); _this.updateText(); event.target.focus(); return false;})
     t.keydown('ctrl+,', function(event) {_this.insertColumn(event.target); _this.updateText(); event.target.focus(); return false;})
+    t.keydown('up', $.proxy(this, 'up'));
+    t.keydown('down', $.proxy(this, 'down'));
+    t.keydown('enter', $.proxy(this, 'down'));
+    t.keydown('left', $.proxy(this, 'left'));
+    t.keydown('right', $.proxy(this, 'right'));
+
+    // exit handlers
     t.find('input').first().keydown('shift+tab', $.proxy(this, 'exitLeft'));
     t.find('input').last().keydown('tab', $.proxy(this, 'exitRight'));
+
     this.updateText();
     var firstinput = t.find('input').first();
     if (options.rows !== undefined) {
@@ -205,6 +213,46 @@ TableWidget.prototype.enter = function(direction) {
         inputs.last().focus();
     }
 }
+
+    TableWidget.prototype.up = function(event) {
+        var td = $(event.target).closest('td')
+        var prevRow = $(td).closest('tr').prev();
+        prevRow && prevRow.find('td:eq('+td.index()+') input').focus();
+    }
+
+    TableWidget.prototype.down = function(event) {
+        var td = $(event.target).closest('td')
+        var nextRow = $(td).closest('tr').next();
+        nextRow && nextRow.find('td:eq('+td.index()+') input').focus();
+    }
+
+    TableWidget.prototype.left = function(event) {
+        var t = $(event.target);
+        var pos = t.getCursorPosition();
+        if (pos===0) {
+            var td = $(event.target).closest('td');
+            var left = td.prev();
+            if (left.length>0) {
+                left.find('input').focus();
+            } else {
+                this.exitLeft();
+            }
+        }
+    }
+
+    TableWidget.prototype.right = function(event) {
+        var t = $(event.target);
+        var pos = t.getCursorPosition();
+        if (pos===t.val().length) {
+            var td = $(event.target).closest('td');
+            var right = td.next();
+            if (right.length>0) {
+                right.find('input').focus();
+            } else {
+                this.exitRight();
+            }
+        }
+    }
 
 TableWidget.prototype.exitLeft = function() {
     this.cm.focus();
