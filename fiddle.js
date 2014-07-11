@@ -51,8 +51,8 @@ function Widget(cm) {
     var _this = this;
     this.cm = cm;
     cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8");
-    var from = cm.getCursor(true);
-    var to = cm.getCursor(false);
+    var from = cm.getCursor(from);
+    var to = cm.getCursor(to);
     this.mark = cm.markText(from, to, {replacedWith: this.domNode, clearWhenEmpty: false});
 
     if (this.enter) {
