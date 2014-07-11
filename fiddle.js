@@ -50,7 +50,7 @@ function Widget(cm) {
     // the subclass must define this.domNode before calling this constructor
     var _this = this;
     this.cm = cm;
-    cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8", "around"), 
+    cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8", "around");
     var from = cm.getCursor("from");
     var to = cm.getCursor("to");
     this.mark = cm.markText(from, to, {replacedWith: this.domNode, clearWhenEmpty: false});
