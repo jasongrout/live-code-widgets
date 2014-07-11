@@ -2,7 +2,7 @@
     border: 1px solid
 }
 .widget-templates {display:none}
-.widget-templates .widget {display: inline-block;}
+.widget-templates div.widget {display: inline-block;}
 .tablewidget table {border-collapse: collapse}
 .tablewidget input {
     margin: 0;
