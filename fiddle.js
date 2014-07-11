@@ -53,7 +53,7 @@ function Widget(cm) {
     cm.replaceSelection("\u2af7"+cm.getSelection()+"\u2af8");
     var from = cm.getCursor(true);
     var to = cm.getCursor(false);
-    this.mark = cm.markText(from, to, {replacedWith: this.domNode});
+    this.mark = cm.markText(from, to, {replacedWith: this.domNode, clearWhenEmpty: false});
 
     if (this.enter) {
         CodeMirror.on(this.mark, "beforeCursorEnter", function(e) {
