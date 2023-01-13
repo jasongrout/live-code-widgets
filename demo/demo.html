@@ -1,0 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://codemirror.net/lib/codemirror.js"></script>
+<link rel="stylesheet" href="http://codemirror.net/lib/codemirror.css">
+<script src="http://codemirror.net/mode/python/python.js"></script>
+<script src="fiddle.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="graph.js"></script>
+<link rel="stylesheet" href="fiddle.css">
+
+<head>
+<title></title>
+</head>
+
+<body>
+
+<p>To insert a matrix widget, press the button or type
+<code>Ctrl-,</code> or <code>Ctrl-.</code>.  Add rows by pressing
+<code>Ctrl-.</code> and columns with <code>Ctrl-,</code>.  Use
+<code>Enter</code> to traverse the table in columns, and
+<code>Tab</code> to traverse the table in rows.  Arrow keys navigate
+the table too.  Entering and exiting the table works with the arrow
+keys or the tab/shift-tab keys.</p>
+
+<p>To insert an integer widget, click the button.  If you have an
+integer selected, it will be the default.  Use arrow keys to navigate
+through the widget.</p>
+
+<p>The graph editor widget is an <a
+href="http://bl.ocks.org/mbostock/929623">example</a> from <a
+href="http://d3js.org/">d3.js</a>.  Click to insert a vertex.  Click
+close to other vertices to insert edges.</p>
+
+<button id="insertinteger">Insert Integer Widget</button>
+<button id="inserttable">Insert Table Widget</button>
+<button id="insertgraph">Insert Graph Widget</button>
+<textarea id="code">
+G = 
+</textarea>
+<p>Text content:</p>
+<pre id="content"></pre>
+<div class="widget-templates">
+    <span class="integerwidget widget"><button class="dec">-</button><input type='text'  class="value" size=4></input><button class="inc">+</button></span>
+    <div class="tablewidget widget" style="display: inline-block;"><table><tr><td><input type="text" size=2></input></td></tr></table></div>
+    <div class="graphwidget widget" style="display: inline-block;"></div>
+</div>
+
+</body> </html>
